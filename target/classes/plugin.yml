@@ -1,9 +1,0 @@
-name: PlayerStatsLogger
-version: '1.0'
-main: tj.playerStatsLogger.PlayerStatsLogger
-api-version: '1.21'
-commands:
-  psl:
-    description: PlayerStatsLogger主命令
-    usage: /psl <reload|status>
-    aliases: [playerstats, stats]
