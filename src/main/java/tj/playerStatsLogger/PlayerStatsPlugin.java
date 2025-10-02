@@ -161,14 +161,17 @@ public final class PlayerStatsPlugin implements Listener {
     }
 
     private void updateRedis(String playerName, String field, int delta) {
-        try (Jedis jedis = redisPool.getResource()) {
-            jedis.hincrBy("player_stats:" + playerName, field, delta);
-            dirtyPlayers.add(playerName); // 标记为待同步
-        } catch (Exception ex) {
-            if (plugin.getConfig().getBoolean("debug")) {
-                plugin.getLogger().warning("Redis error for " + playerName + ": " + ex.getMessage());
+        // 异步执行 Redis 操作，避免阻塞主线程
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try (Jedis jedis = redisPool.getResource()) {
+                jedis.hincrBy("player_stats:" + playerName, field, delta);
+                dirtyPlayers.add(playerName); // 标记为待同步
+            } catch (Exception ex) {
+                if (plugin.getConfig().getBoolean("debug")) {
+                    plugin.getLogger().warning("Redis error for " + playerName + ": " + ex.getMessage());
+                }
             }
-        }
+        });
     }
 
     private int parseInt(String s) {
